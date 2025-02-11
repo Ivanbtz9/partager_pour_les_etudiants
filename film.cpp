@@ -88,7 +88,9 @@ void importer(std::string path, ensemble& E) {
     }
 }
 
-
+void affiche_films(ensemble& E){
+    
+}
 
 
 
