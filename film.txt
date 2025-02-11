@@ -1,0 +1,41 @@
+8
+Sueurs froides
+1958
+Alfred Hitchcock
+128
+anglais
+Taxi Driver
+1976
+Martin Scorsese
+110
+anglais
+Parasite
+2019
+Bong Joon-ho
+132
+coréen
+Inception
+2010
+Christopher Nolan
+148
+anglais
+Le Fabuleux Destin d'Amélie Poulain
+2001
+Jean-Pierre Jeunet
+122
+français
+The Godfather
+1972
+Francis Ford Coppola
+175
+anglais
+Spirited Away
+2001
+Hayao Miyazaki
+125
+japonais
+Pulp Fiction
+1994
+Quentin Tarantino
+154
+anglais

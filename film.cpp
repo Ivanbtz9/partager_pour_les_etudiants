@@ -88,6 +88,10 @@ void importer(std::string path, ensemble& E) {
     }
 }
 
+
+
+
+
 int main(){
 
     std::string path = "./film.txt"; 
