@@ -51,7 +51,6 @@ void importer(std::string path, ensemble& E) {
         E.T = new film[E.nbfilms];
 
         std::string ligne;
-        //std::cout << "Type of E.T[i]: " << typeid((*E.T)).name() << std::endl;
 
         for (int i = 0; i < E.nbfilms;i++){
             std::getline(fic,ligne); 
@@ -96,15 +95,14 @@ void construire_selection(ensemble& E, selection& S) {
 
     // Dynamically allocate memory for the array of pointers to films
     S.T = new film*[S.nbfilms];
-    std::cout << "Type of S.T[i]: " << typeid(S.T).name() << std::endl;
-    std::cout << "Type of E.T[i]: " << typeid(E.T).name() << std::endl;
     // Assign pointers in the selection to point to the corresponding films in the ensemble
     for (int i = 0; i < S.nbfilms; ++i) {
         S.T[i] = &E.T[i];
     }
 }
 
-//Q5
+
+//Q6
 // Function to display the films in a selection
 void afficher_selection(const selection& S) {
     for (int i = 0; i < S.nbfilms; ++i) {
@@ -118,6 +116,27 @@ void afficher_selection(const selection& S) {
     }
 }
 
+//Q5
+void selectionPersonnalisee (ensemble & E, selection & S, std::string real,const int anneemin, const int anneemax){
+    S.nbfilms = 0;
+	for (int i = 0; i < E.nbfilms; ++i){
+        if ((E.T[i].realisateur == real) && (anneemin <= E.T[i].annee) && (anneemax >= E.T[i].annee)){
+            S.nbfilms ++;
+            }
+    S.T = new film*[S.nbfilms];
+    int j = 0;
+    if(S.nbfilms >0 ){
+        for (int i = 0; i < E.nbfilms; ++i){
+        if ((E.T[i].realisateur == real) && (anneemin <= E.T[i].annee) && (anneemax >= E.T[i].annee)){
+            S.T[j] = &E.T[i];
+            j++;
+            }
+        }
+    }else{S.T = nullptr;}
+    
+    }
+    std::cout << S.nbfilms << std::endl;
+}
 
 
 
@@ -130,19 +149,47 @@ int main(){
     importer(path, E);
 
     // Display the films
-    //afficher_films(E);
+    afficher_films(E);
 
     // Create a selection containing all films
     selection S;
     construire_selection(E, S);
 
+    /*std::cout << "Type of E.T: " << typeid(E.T).name() << std::endl;
+    std::cout << "E.T = " << E.T << std::endl;
+    std::cout << "Type of E.T[0]: " << typeid(E.T[0]).name() << std::endl;
+    std::cout << "E.T[0].titre = " << E.T[0].titre << std::endl;
+    std::cout << "E.T[1].titre = " << E.T[1].titre << std::endl;
+    std::cout << std::endl;
+
+
+    std::cout << "Type of S.T: " << typeid(S.T).name() << std::endl;
+    std::cout << "S.T = " << S.T << std::endl;
+    std::cout << "Type of S.T[0]: " << typeid(S.T[0]).name() << std::endl;
+    std::cout << "S.T[0] = " << S.T[0] << std::endl;
+    std::cout << "S.T[0]->titre = " << S.T[0]->titre << std::endl;
+    std::cout << "Type of S.T[1]: " << typeid(S.T[1]).name() << std::endl;
+    std::cout << "S.T[1] = " << S.T[1] << std::endl;
+    std::cout << "S.T[1]->titre = " << S.T[1]->titre << std::endl;
+    */
+
     // Display the films in the selection
-    std::cout << "\nSélection des films (tous les films de l'ensemble) :\n";
+    //std::cout << "\nSélection des films (tous les films de l'ensemble) :\n";
     //afficher_selection(S);
+
+    selection MyS;
+    std::string real = "Quentin Tarantino";
+    int anneemin = 1800;
+    int anneemax = 2025; 
+
+    std::cout << "\nSélection personnalisée :\n";
+    selectionPersonnalisee(E, MyS, real, anneemin, anneemax);
+    afficher_selection(MyS);
 
     // Clean up dynamically allocated memory
     delete[] E.T;
     delete[] S.T;
+    delete[] MyS.T;
 
         
     return 0;
