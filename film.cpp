@@ -33,7 +33,6 @@ struct selection {
     // and store only the references (pointers) to the films we want.
 };
 
-
 //Q2
 // Function to read films from a file and store them in the ensemble
 void importer(std::string path, ensemble& E) {
@@ -43,43 +42,29 @@ void importer(std::string path, ensemble& E) {
     if (fic.is_open()){
         std::cout << "L'ouverture du fic s'est bien passée." << std::endl;
 
+        // Read the number of films (first line of the file)
+        //std::cout << "Type of fic: " << typeid(fic).name() << std::endl;
         fic >> E.nbfilms;
-        fic.ignore(); 
+        fic.ignore();  // Ignore the newline after the number of films
+
+        // Dynamically allocate memory for the array of films
         E.T = new film[E.nbfilms];
 
-        std::string line;
-        for(int i = 0; i < E.nbfilms; i++){
-            //pour le titre 
-            std::getline(fic,line); // permet de récupérer la ligne
-            E.T[i].titre = line;
-            //std::cout << E.T[i].titre << std::endl;
+        std::string ligne;
+        //std::cout << "Type of E.T[i]: " << typeid((*E.T)).name() << std::endl;
 
-            //pour l'année 
-            fic >> E.T[i].annee;
+        for (int i = 0; i < E.nbfilms;i++){
+            std::getline(fic,ligne); 
+            E.T[i].titre = ligne;
+			fic >> E.T[i].annee; 
             fic.ignore();
-            //std::cout << E.T[i].annee << std::endl;
-
-            //pour le réalisateur
-            std::getline(fic,line); // permet de récupérer la ligne
-            E.T[i].realisateur = line;
-            //std::cout << E.T[i].realisateur << std::endl;
-
-            //pour la durée 
-            fic >> E.T[i].duree;
+			std::getline(fic,ligne); 
+            E.T[i].realisateur = ligne;
+			fic >> E.T[i].duree; 
             fic.ignore();
-            //std::cout << E.T[i].duree << std::endl;
-
-            //pour la langue
-            std::getline(fic,line); // permet de récupérer la ligne
-            E.T[i].langue = line;
-            //std::cout << E.T[i].langue << std::endl;
-
-            //break;
-
+			std::getline(fic,ligne); 
+            E.T[i].langue = ligne;   
         }
-
-
-
         fic.close();  // Close the file after reading
     } else {
         std::cout << "L'ouverture du fic a échouée." << std::endl;
@@ -88,18 +73,77 @@ void importer(std::string path, ensemble& E) {
     }
 }
 
-void affiche_films(ensemble& E){
-    
+//Q3
+// Function to display information about all films in the ensemble
+void afficher_films(ensemble & E) {
+    for (int i = 0; i < E.nbfilms; ++i) {
+        std::cout << "Film #" << (i + 1) << ":" << std::endl;
+        std::cout << "  Titre: " << E.T[i].titre << std::endl;
+        std::cout << "  Année: " << E.T[i].annee << std::endl;
+        std::cout << "  Réalisateur: " << E.T[i].realisateur << std::endl;
+        std::cout << "  Durée: " << E.T[i].duree << " min" << std::endl;
+        std::cout << "  Langue: " << E.T[i].langue << std::endl;
+        std::cout << std::endl;
+    }
 }
+
+
+//Q4
+// Function to construct a selection containing all films from an ensemble
+void construire_selection(ensemble& E, selection& S) {
+    // Set the number of films in the selection to be the same as in the ensemble
+    S.nbfilms = E.nbfilms;
+
+    // Dynamically allocate memory for the array of pointers to films
+    S.T = new film*[S.nbfilms];
+    std::cout << "Type of S.T[i]: " << typeid(S.T).name() << std::endl;
+    std::cout << "Type of E.T[i]: " << typeid(E.T).name() << std::endl;
+    // Assign pointers in the selection to point to the corresponding films in the ensemble
+    for (int i = 0; i < S.nbfilms; ++i) {
+        S.T[i] = &E.T[i];
+    }
+}
+
+//Q5
+// Function to display the films in a selection
+void afficher_selection(const selection& S) {
+    for (int i = 0; i < S.nbfilms; ++i) {
+        std::cout << "Film #" << (i + 1) << ":" << std::endl;
+        std::cout << "  Titre: " << S.T[i]->titre << std::endl;
+        std::cout << "  Année: " << S.T[i]->annee << std::endl;
+        std::cout << "  Réalisateur: " << S.T[i]->realisateur << std::endl;
+        std::cout << "  Durée: " << S.T[i]->duree << " min" << std::endl;
+        std::cout << "  Langue: " << S.T[i]->langue << std::endl;
+        std::cout << std::endl;
+    }
+}
+
 
 
 
 int main(){
 
     std::string path = "./film.txt"; 
+
     ensemble E;
 
     importer(path, E);
+
+    // Display the films
+    //afficher_films(E);
+
+    // Create a selection containing all films
+    selection S;
+    construire_selection(E, S);
+
+    // Display the films in the selection
+    std::cout << "\nSélection des films (tous les films de l'ensemble) :\n";
+    //afficher_selection(S);
+
+    // Clean up dynamically allocated memory
+    delete[] E.T;
+    delete[] S.T;
+
         
     return 0;
 }
