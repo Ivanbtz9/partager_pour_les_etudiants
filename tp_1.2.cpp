@@ -1,5 +1,7 @@
 #include <iostream>
 
+//Correction de : Haby DOUCOURE
+//Q1
 void saisir(float &a,float &b,float &c)
 {
     std::cout<<"saisir la longueur des trois côtés du triangle:" << std::endl;
@@ -11,7 +13,7 @@ void saisir(float &a,float &b,float &c)
     std::cin>>c;
 }
 
-//2
+//Q2
 void validite(float a,float b,float c){
 
     if((a+b>c )and (b+c>a) and (c+a>b)){
@@ -22,7 +24,8 @@ void validite(float a,float b,float c){
     }
 }
 
-
+// correction de : TESSA DAMIA
+//Q3
 float perim(float a, float b, float c){
  return a+b+c;
 
@@ -72,7 +75,9 @@ std::string nature(float a, float b, float c){
 int main()
 {
     float a,b,c;
+    //Q1
     saisir(a,b,c);
+    //Q2
     validite(a,b,c);
     return 0;
 }
