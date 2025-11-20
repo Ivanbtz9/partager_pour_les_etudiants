@@ -28,6 +28,16 @@ void validite(float a,float b,float c){
     }
 }
 
+bool valide_triangle(float a, float b,float c){
+    if((a+b>c )and (b+c>a) and (c+a>b)){
+        return true;
+    }
+    else{
+       return false;
+    }
+
+}
+
 //3
 float perim(float a, float b, float c){
  return a+b+c;
@@ -79,10 +89,17 @@ string nature(float a, float b, float c){
 
 int main()
 {
-    float a=3,b=4,c=5;
+    float a = 0.0, b = 0.0, c = 0.0;
     string nature_du_triangle;
-    // saisir(a,b,c);
-    validite(a,b,c);
+
+    //Alexandre TOUCHARD
+    while(valide_triangle(a, b, c) == false)
+    {
+        std::cout << "Triangle invalide, recommencez." << std::endl;
+        saisir(a, b, c);
+    }
+    validite(a, b, c);
+
     nature_du_triangle = nature(a, b, c);
     cout << "Le triangle est : " << nature_du_triangle << endl;
     return 0;
