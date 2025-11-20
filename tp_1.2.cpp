@@ -1,31 +1,34 @@
+
+// CPP code to illustrate the use of sqrt function
+#include <cmath>
+#include <iomanip>
 #include <iostream>
 
-//Correction de : Haby DOUCOURE
-//Q1
+using namespace std; //utiliser cette commande pour ne pas avoir à mettre std:: 
+
 void saisir(float &a,float &b,float &c)
 {
-    std::cout<<"saisir la longueur des trois côtés du triangle:" << std::endl;
-	std::cout<<"a = ";
-    std::cin>>a;
-	std::cout<<"b = ";
-    std::cin>>b;
-	std::cout<<"c = ";
-    std::cin>>c;
+    cout<<"saisir la longueur des trois côtés du triangle:" << endl;
+	cout<<"a = ";
+    cin>>a;
+	cout<<"b = ";
+    cin>>b;
+	cout<<"c = ";
+    cin>>c;
 }
 
-//Q2
+//2
 void validite(float a,float b,float c){
 
     if((a+b>c )and (b+c>a) and (c+a>b)){
-        std::cout<<"c'est un triangle valide";
+        cout<<"c'est un triangle valide" << endl;
     }
     else{
-       std::cout<<"ce n'est pas un triangle valide ";
+       cout<<"ce n'est pas un triangle valide " << endl;
     }
 }
 
-// correction de : TESSA DAMIA
-//Q3
+//3
 float perim(float a, float b, float c){
  return a+b+c;
 
@@ -36,6 +39,7 @@ float aire(float a, float b, float c){
 return sqrt(S*(S-a)*(S-b)*(S-c));
 }
 
+//4
 bool equi(float a, float b, float c){
  if(a==b && a==c && b==c){
  return true;
@@ -52,7 +56,7 @@ bool iso( float a, float b, float c){
 }
 
 bool rect(float a, float b, float c){
- if(a*a+b*b==c*c or a*a+c*c==b*b or b*b+c*c==a*a){
+ if(a*a+b*b==c*c or a*a+c*c==b*b or b*b+c*c==a*a){//theoreme de pythagore 
  return true;
  }
  else return false;
@@ -64,7 +68,8 @@ bool plat(float a, float b, float c){
 else return false;
 }
 
-std::string nature(float a, float b, float c){
+//6
+string nature(float a, float b, float c){
  if(rect(a,b,c)) return "rectangle";
  else if(equi(a,b,c)) return "equilatéral";
  else if(plat(a,b,c)) return "plat";
@@ -74,10 +79,11 @@ std::string nature(float a, float b, float c){
 
 int main()
 {
-    float a,b,c;
-    //Q1
-    saisir(a,b,c);
-    //Q2
+    float a=3,b=4,c=5;
+    string nature_du_triangle;
+    // saisir(a,b,c);
     validite(a,b,c);
+    nature_du_triangle = nature(a, b, c);
+    cout << "Le triangle est : " << nature_du_triangle << endl;
     return 0;
 }
