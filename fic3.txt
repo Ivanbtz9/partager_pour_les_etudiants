@@ -1,0 +1,1243 @@
+Hello I love pasta 
+PS(1)                          Commandes de l'utilisateur                          PS(1)
+
+NOM
+       ps - Présenter un cliché instantané des processus en cours
+
+SYNOPSIS
+       ps [options]
+
+DESCRIPTION
+       ps displays information about a selection of the active processes. If you want a
+       repetitive update of the selection and the displayed information, use top
+       instead.
+
+       Cette version de ps accepte plusieurs types d'options :
+
+       1   les options UNIX qui peuvent être regroupées et qui doivent être précédées
+           d'un tiret ;
+       2   les options BSD qui peuvent être regroupées et qui ne doivent pas être
+           utilisées avec un tiret ;
+       3   les options GNU de forme longue qui doivent être précédées de deux tirets.
+
+       Les options de différents types peuvent être mélangées, mais des conflits peuvent
+       apparaître. Certaines options sont synonymes (fonctionnellement identiques) à
+       cause des différentes normes et implémentations de ps avec lesquelles ce ps est
+       compatible.
+
+       Note that ps -aux is distinct from ps aux. The POSIX and UNIX standards require
+       that ps -aux print all processes owned by a user named x, as well as printing all
+       processes that would be selected by the -a option. If the user named x does not
+       exist, this ps may interpret the command as ps aux instead and print a warning.
+       This behavior is intended to aid in transitioning old scripts and habits. It is
+       fragile, subject to change, and thus should not be relied upon.
+
+       Par défaut, ps sélectionne tous les processus avec le même identifiant
+       utilisateur effectif (euid=EUID) que l'utilisateur en cours et associés au même
+       terminal que l'appelant. Il affiche l'identifiant de processus (pid=PID), le
+       terminal associé au processus (tname=TTY), le temps CPU cumulé au format
+       [JJ-]HH:MM:SS (time=TIME) et le nom de l'exécutable (ucmd=CMD). La sortie n'est
+       pas ordonnée par défaut.
+
+       L'utilisation d'options « à la BSD » ajoutera l'état du processus (stat=STAT) à
+       l'affichage par défaut et montrera les arguments de commande (args=COMMAND) au
+       lieu du nom de l'exécutable. La variable d'environnement PS_FORMAT permet de
+       modifier ce comportement. L'utilisation d'options « à la BSD » modifiera
+       également la sélection de processus pour inclure les processus d'autres terminaux
+       (TTY) vous appartenant ; autrement dit, il s'agit de la sélection de tous les
+       processus, filtrés pour exclure les processus appartenant aux autres utilisateurs
+       ou en dehors d'un terminal. Ces effets ne sont pas pris en compte pour les
+       options décrites ci-dessous comme « identiques », donc -M sera considérée
+       identique à Z et ainsi de suite.
+
+       Aux exceptions près décrites ci-dessous, les options de sélection de processus
+       sont cumulatives. La sélection par défaut est supprimée, puis les processus
+       sélectionnés sont ajoutés à l'ensemble des processus à afficher. Un processus
+       sera donc montré s'il satisfait n'importe quel critère de sélection donné.
+
+EXEMPLES
+       Pour voir tous les processus du système en utilisant la syntaxe traditionnelle :
+          ps -e
+          ps -ef
+          ps -eF
+          ps -ely
+
+       Pour voir tous les processus du système en utilisant la syntaxe BSD :
+          ps ax
+          ps axu
+
+       Pour afficher une arborescence des processus :
+          ps -ejH
+          ps axjf
+
+       Pour obtenir des renseignements sur les processus légers (« threads ») :
+          ps -eLf
+          ps axms
+
+       Pour obtenir des renseignements de sécurité :
+          ps -eo euser,ruser,suser,fuser,f,comm,label
+          ps axZ
+          ps -eM
+
+       Pour voir tous les processus exécutés en tant que superutilisateur (identifiant
+       réel et effectif) au format utilisateur :
+          ps -U root -u root u
+
+       Pour voir tous les processus avec un format défini par l'utilisateur :
+          ps -eo pid,tid,class,rtprio,ni,pri,psr,pcpu,stat,wchan:14,comm
+          ps axo stat,euid,ruid,tty,tpgid,sess,pgrp,ppid,pid,pcpu,comm
+          ps -Ao pid,tt,user,fname,tmout,f,wchan
+
+       N'afficher que le PID de syslogd :
+          ps -C syslogd -o pid=
+
+       Afficher uniquement le nom du PID 42 :
+          ps -q 42 -o comm=
+
+SÉLECTION SIMPLE DES PROCESSUS
+       a      Lever la restriction « seulement vous » du style BSD, qui est imposée sur
+              l'ensemble des processus si des options « à la BSD » (sans « - ») sont
+              utilisées ou si la personnalité de ps est configurée « à la BSD ».
+              L'ensemble des processus sélectionnés de cette façon est ajouté à
+              l'ensemble des processus sélectionnés autrement. Autrement dit, cette
+              option conduit ps à énumérer tous les processus avec un terminal (tty) ou
+              énumérer tous les processus lorsqu'elle est utilisée avec l'option x.
+
+       -A     Sélectionner tous les processus. Identique à -e.
+
+       -a     Sélectionner tous les processus sauf les meneurs de session (consultez
+              getsid(2)) et les processus non associés à un terminal.
+
+       -d     Sélectionner tous les processus sauf les meneurs de session.
+
+       --deselect
+              Sélectionner tous les processus sauf ceux qui remplissent les conditions
+              indiquées (inverse la sélection). Identique à -N.
+
+       -e     Sélectionner tous les processus. Identique à -A.
+
+       g      Vraiment tout, même les meneurs de session. Cette option est obsolète et
+              peut disparaître des prochaines publications. Elle est normalement
+              implicite avec l'option a, et n'est utile qu'en fonctionnement avec la
+              personnalité sunos4.
+
+       -N     Sélectionner tous les processus sauf ceux qui remplissent les conditions
+              indiquées (inverse la sélection). Identique à --deselect.
+
+       T      Sélectionner tous les processus associés à ce terminal. Identique à
+              l'option t sans autre paramètre.
+
+       r      Restreindre la sélection aux processus en cours d'exécution.
+
+       x      Lever la restriction « doit avoir un terminal » du style BSD, qui est
+              imposée sur l'ensemble des processus si des options « à la BSD » (sans
+              « - ») sont utilisées ou si la personnalité de ps est configurée « à la
+              BSD ». L'ensemble des processus sélectionnés de cette façon est ajouté à
+              l'ensemble des processus sélectionnés autrement. Autrement dit, cette
+              option conduit ps à énumérer tous les processus vous appartenant (même
+              EUID que ps) ou énumérer tous les processus lorsqu'elle est utilisée avec
+              l'option a.
+
+SÉLECTION DES PROCESSUS PAR UNE LISTE
+       Ces options acceptent un unique paramètre sous forme de liste séparée par des
+       blancs ou des virgules. Elles peuvent être utilisées plusieurs fois. Par
+       exemple : ps -p "1 2" -p 3,4.
+
+       -123   Identique à --pid 123.
+
+       123    Identique à --pid 123.
+
+       -C liste_commandes
+              Sélectionner par nom de commande. Cela sélectionne les processus dont le
+              nom d'exécutable figure dans liste_commandes. REMARQUE : le nom de la
+              commande n'est pas le même que le nom sur la ligne de commande. Les
+              anciennes versions de procps et du noyau réduisaient ce nom de commande à
+              15 caractères. Cette limite n'existe plus. Si vous faisiez une recherche
+              sur 15 caractères seulement, il se peut que votre recherche ne donne plus
+              de résultats.
+
+       -G liste_groupes
+              Sélectionner par nom ou identifiant de groupe réel (RGID). Cela
+              sélectionne les processus dont l'identifiant ou nom de groupe réel est
+              dans liste_groupes. Le RGID identifie le groupe de l'utilisateur qui a
+              créé le processus, consultez getgid(2).
+
+       -g liste_groupes
+              Sélectionner par session ou nom de groupe effectif. La sélection par
+              session est précisée par plusieurs normes, mais la sélection par groupe
+              effectif est le comportement logique utilisé par de nombreux autres
+              systèmes d'exploitation. Ce ps sélectionnera par session quand la liste
+              est complètement numérique (comme le sont les sessions). Les GID
+              numériques fonctionneront seulement quand des noms de groupes sont
+              également indiqués. Consultez les options -s et --group.
+
+       --Group liste_groupes
+              Sélectionner par identifiant de groupe réel (RGID) ou nom. Identique à -G.
+
+       --group liste_groupes
+              Sélectionner par identifiant de groupe effectif (EGID) ou nom. Cela
+              sélectionne les processus dont l'identifiant ou nom de groupe effectif est
+              dans liste_groupes. L'EGID identifie le groupe dont les droits d'accès au
+              fichier sont utilisés par le processus, consultez getegid(2). L'option -g
+              est souvent une alternative à --group.
+
+       p liste_pid
+              Sélectionner par identifiant de processus (PID). Identique à -p et --pid.
+
+       -p liste_pid
+              Sélectionner par PID. Cela sélectionne les processus dont l'identifiant de
+              processus apparaît dans liste_pid. Identique à p et --pid.
+
+       --pid liste_pid
+              Sélectionner par identifiant de processus (PID). Identique à -p et p.
+
+       --ppid liste_pid
+              Sélectionner par PID parent. Cela sélectionne des processus dont le PID
+              parent est dans liste_pid. Autrement dit, il sélectionne les processus
+              enfants de ceux indiqués dans liste_pid.
+
+       q liste_pid
+              Sélectionner par identifiant de processus (PID). Identique à -q et
+              --quick-pid.
+
+       -q liste_pid
+              Sélectionner par PID (mode rapide). Cela sélectionne les processus dont le
+              numéro d'identifiant figure dans liste_pid. Avec cette option, ps ne lit
+              les informations nécessaires que pour les PID se trouvant dans liste_pid
+              et il n'applique aucune règle de filtrage supplémentaire. Les PID ne sont
+              pas triés et ils sont préservés. Dans ce mode, aucune option de sélection
+              supplémentaire, aucun tri ou listage en arborescence n'est possible.
+              Identique à q et --quick-pid.
+
+       --quick-pid liste_pid
+              Sélectionner par identifiant de processus (PID). Identique à -q et q.
+
+       -s liste_sessions
+              Sélectionner par identifiant de session. Cela sélectionne les processus
+              dont l'identifiant de session est indiqué dans liste_sessions.
+
+       --sid liste_sessions
+              Sélectionner par identifiant de session. Identique à -s.
+
+       t liste_ttys
+              Sélectionner par terminal (tty). Quasiment identique à -t et --tty, mais
+              peut également être utilisé avec une liste_ttys vide pour indiquer le
+              terminal associé à ps. L'utilisation de l'option T est considérée plus
+              propre que l'utilisation de t avec une liste_ttys vide.
+
+       -t liste_ttys
+              Sélectionner par tty. Cela sélectionne les processus associés aux
+              terminaux donnés dans liste_ttys. Les terminaux (ttys, ou écrans pour
+              sortie texte) peuvent être indiqués sous différentes formes : /dev/ttyS1,
+              ttyS1, S1. Un simple « - » permet de sélectionner les processus qui ne
+              sont pas attachés à un terminal.
+
+       --tty liste_ttys
+              Sélectionner par terminal. Identique à -t et t.
+
+       U liste_utilisateurs
+              Sélectionner par identifiant d'utilisateur effectif (EUID) ou nom. Cela
+              sélectionne les processus dont l'identifiant ou nom d'utilisateur effectif
+              est dans liste_utilisateurs. L'EUID identifie l'utilisateur dont les
+              droits d'accès au fichier sont utilisés par le processus, consultez
+              geteuid(2). Identique à -u et --user.
+
+       -U liste_utilisateurs
+              Sélectionner par identifiant d'utilisateur réel (RUID) ou nom. Cela
+              sélectionne les processus dont l'identifiant ou nom d'utilisateur réel est
+              dans liste_utilisateurs. Le RUID identifie l'utilisateur qui a créé le
+              processus, consultez getuid(2).
+
+       -u liste_utilisateurs
+              Sélectionner par identifiant d'utilisateur effectif (EUID) ou nom. Cela
+              sélectionne les processus dont le nom ou l'identifiant d'utilisateur
+              effectif est dans liste_utilisateurs.
+
+              L'EUID identifie l'utilisateur dont les droits d'accès au fichier sont
+              utilisés par le processus, consultez geteuid(2). Identique à U et --user.
+
+       --User liste_utilisateurs
+              Sélectionner par identifiant d'utilisateur réel (RUID) ou nom. Identique à
+              -U.
+
+       --user liste_utilisateurs
+              Sélectionner par identifiant d'utilisateur effectif (EUID) ou nom.
+              Identique à -u et U.
+
+CONTRÔLE DU FORMAT DE SORTIE
+       Ces options sont utilisées pour choisir les renseignements affichés par ps. La
+       sortie peut changer en fonction de la personnalité.
+
+       -c     Montrer des renseignements d'ordonnanceur différents pour l'option -l.
+
+       --context
+              Afficher au format du contexte de sécurité (pour SELinux).
+
+       -f     Faire une liste au format complet. Cette option peut être combinée aux
+              nombreuses autres options « à la UNIX » pour ajouter des colonnes
+              supplémentaires. Cela conduit également à afficher les paramètres de la
+              commande. Lorsqu'elle est utilisée avec -L, les colonnes NLWP (nombre de
+              processus légers) et LWP (identifiant de processus léger) seront ajoutées.
+              Consultez l'option c et les mots-clés de format args et comm.
+
+       -F     Format complet étendu. Consultez l'option -f, implicite avec -F.
+
+       --format format
+              Format défini par l'utilisateur. Identique à -o et o.
+
+       j      Format BSD de contrôle des tâches.
+
+       -j     Format des tâches.
+
+       l      Afficher au format BSD long.
+
+       -l     Format long. L'option -y est souvent utile en complément.
+
+       -M     Afficher une colonne de données de sécurité. Identique à Z (pour SELinux).
+
+       O format
+              o préchargé (surchargé). L'option BSD O peut se comporter comme -O (format
+              de sortie défini par l'utilisateur avec quelques champs communs
+              prédéfinis) ou être utilisée pour indiquer un ordre de tri. Les paramètres
+              sont utilisés pour déterminer le comportement de cette option. Pour
+              s'assurer que le comportement voulu soit obtenu (tri ou formatage),
+              indiquer cette option d'une autre façon (par exemple avec -O ou --sort).
+              Identique à -O quand utilisée comme option de formatage, avec la
+              personnalité BSD.
+
+       -O format
+              Comme -o, mais préchargé avec quelques colonnes par défaut. Identique à
+              -o pid,format,state,tname,time,command ou -o pid,format,tname,time,cmd,
+              consultez -o ci-dessous.
+
+       o format
+              Indiquer un format défini par l'utilisateur. Identique à -o et --format.
+
+       -o format
+              Format défini par l'utilisateur. format est un paramètre unique sous forme
+              de liste séparée par des blancs ou des virgules, qui permet d'indiquer des
+              colonnes de sorties individuelles. Les mots-clés reconnus sont décrits
+              ci-dessous dans la section INDICATEURS DE FORMAT STANDARDS. Les en-têtes
+              peuvent êtres renommés (ps -o pid,ruser=RealUser -o comm=Command) si
+              besoin. Si tous les en-têtes de colonnes sont vides (ps -o pid= -o comm=),
+              la ligne d'en-têtes ne sera pas affichée. La largeur de colonne augmentera
+              si de larges en-têtes l'exigent ; ce peut être utilisé pour élargir des
+              colonnes comme WCHAN (ps -o pid,wchan=WIDE-WCHAN-COLUMN -o comm). Un
+              contrôle explicite de la largeur (ps opid,wchan:42,cmd) est également
+              possible. Le comportement de ps -o pid=X,comm=Y change avec les
+              personnalités ; la sortie peut être une colonne appelée « X,comm=Y » ou
+              deux colonnes appelées « X » et « Y ». Utilisez plusieurs options -o pour
+              dissiper les doutes. Utilisez la variable d'environnement PS_FORMAT pour
+              indiquer une valeur par défaut ; DefSysV et DefBSD sont des macros qui
+              peuvent être utilisées pour choisir les colonnes UNIX ou BSD par défaut.
+
+       -P     Add a column showing psr.
+
+       s      Afficher au format de signal.
+
+       u      Afficher au format orienté utilisateur.
+
+       v      Afficher au format de mémoire virtuelle.
+
+       X      Format de registre.
+
+       -y     Ne pas montrer d'indicateurs ; montrer rss au lieu de addr. Cette option
+              ne peut être utilisée qu'avec -l.
+
+       Z      Afficher une colonne de données de sécurité. Identique à -M (pour
+              SELinux).
+
+MODIFICATEURS DE SORTIE
+       c      Montrer les vrais noms de commande. Cela vient du nom de fichier
+              exécutable, plutôt que de la valeur argv. Les paramètres de la commande et
+              leurs modifications éventuelles ne sont donc pas montrés. Cette option
+              transforme en fait le mot-clé de format args en comm ; c'est pratique pour
+              l'option de format -f et avec toutes les options de format « à la BSD »,
+              qui entraînent normalement toutes un affichage des paramètres de la
+              commande. Consultez l'option -f et les mots-clés de format args et comm.
+
+       --cols n
+              Configurer la largeur de l'écran.
+
+       --columns n
+              Configurer la largeur de l'écran.
+
+       --cumulative
+              Inclure des données sur les processus enfants tués (comme une somme avec
+              le parent).
+
+       e      Montrer l'environnement après la commande.
+
+       f      Hiérarchie des processus en ASCII art (arborescence).
+
+       --forest
+              Arborescence des processus en ASCII art.
+
+       h      Sans en-tête (ou avec un en-tête par écran en personnalité BSD). L'option
+              h est problématique. Le ps standard de BSD utilise cette option pour
+              afficher un en-tête sur chaque page de sortie, mais l'ancien ps de Linux
+              utilise cette option pour désactiver l'en-tête. Cette version de ps suit
+              l'habitude de Linux de ne pas afficher l'en-tête sauf si la personnalité
+              BSD a été choisie, auquel cas elle affiche un en-tête sur chaque page de
+              sortie. Quelle que soit la personnalité utilisée, les options longues
+              --headers et --no-headers permettent respectivement d'activer l'affichage
+              des en-têtes sur chaque page ou de désactiver complètement les en-têtes.
+
+       -H     Montrer la hiérarchie des processus (arborescence).
+
+       --headers
+              Répéter les lignes d'en-tête, une par page de sortie.
+
+       k spec Indiquer l'ordre de tri. La syntaxe de tri est
+              « [+|-]clé[,[+|-]clé[,...]] ». Choisir une clé multicaractère de la
+              section INDICATEURS DE FORMAT STANDARDS. Le « + » est facultatif puisque
+              l'ordre numérique ou lexicographique est croissant par défaut. Identique à
+              --sort.
+
+                      Exemples :
+                      ps jaxkuid,-ppid,+pid
+                      ps axk comm o comm,args
+                      ps kstart_time -ef
+
+       --lines n
+              Configurer la hauteur de l'écran.
+
+       n      Sortie numérique pour WCHAN et USER (incluant tous les types d'UID et
+              GID).
+
+       --no-headers
+              Ne pas afficher d'en-tête du tout. --no-heading est un alias pour cette
+              option.
+
+       O order
+              Ordre de tri (surchargé). L'option BSD O peut se comporter comme -O
+              (format de sortie défini par l'utilisateur avec quelques champs communs
+              prédéfinis) ou peut être utilisée pour indiquer un ordre de tri. Les
+              paramètres sont utilisés pour déterminer le comportement de cette option.
+              Pour s'assurer que le comportement voulu soit obtenu (tri ou formatage),
+              indiquer cette option d'une autre façon (par exemple avec -O ou --sort).
+
+              Pour trier, la syntaxe de l'option BSD obsolète est
+              « O[+|-]k1[,[+|-]k2[,...]] ». L'ordre de la liste de processus est
+              effectué en fonction de l'ordre multiniveau indiqué par la suite de clés
+              courtes à une lettre k1, k2, etc., décrites ci-dessous dans la section
+              CLÉS DE TRI OBSOLÈTES. Le « + » actuellement facultatif réitère simplement
+              l'ordre par défaut d'une clé, mais permet également de distinguer un O de
+              tri d'un O de formatage. Le « - » inverse uniquement l'ordre de la clé
+              qu'il précède.
+
+       --rows n
+              Configurer la hauteur de l'écran.
+
+       S      Résumer quelques renseignements, comme l'utilisation CPU, à partir des
+              processus enfants tués dans leur parent. C'est pratique pour observer un
+              système où les processus parents engendrent des processus enfants de
+              courte durée de vie pour faire leur travail.
+
+       --sort spec
+              Indiquer l'ordre de tri. La syntaxe de tri est
+              « [+|-]clé[,[+|-]clé[,...]] ». Choisir une clé multicaractère de la
+              section INDICATEURS DE FORMAT STANDARDS. Le « + » est facultatif puisque
+              l'ordre numérique ou lexicographique est croissant par défaut. Identique à
+              k. Par exemple : ps jax --sort=uid,-ppid,+pid.
+
+       w      Sortie large. Utilisez cette option deux fois pour une largeur illimitée.
+
+       -w     Sortie large. Utilisez cette option deux fois pour une largeur illimitée.
+
+       --width n
+              Configurer la largeur de l'écran.
+
+AFFICHAGE DE PROCESSUS LÉGERS (« THREAD »)
+       H      Montrer les processus légers comme s'ils étaient des processus.
+
+       -L     Montrer les processus légers, si possible avec les colonnes LWP et NLWP.
+
+       m      Montrer les processus légers après les processus.
+
+       -m     Montrer les processus légers après les processus.
+
+       -T     Montrer les processus légers, si possible avec la colonne SPID.
+
+AUTRES RENSEIGNEMENTS
+       --help section
+              Print a help message. The section argument can be one of simple, list,
+              output, threads, misc, or all. The argument can be shortened to one of the
+              underlined letters as in: s|l|o|t|m|a.
+
+       --info Afficher des informations de débogage.
+
+       L      Afficher la liste de tous les indicateurs de format.
+
+       V      Afficher la version de procps-ng.
+
+       -V     Afficher la version de procps-ng.
+
+       --version
+              Afficher la version de procps-ng.
+
+NOTES
+       Ce ps fonctionne en lisant les fichiers virtuels de /proc. Ce ps n'a pas besoin
+       d'être Set-UID kmem et ne nécessite aucun privilège pour fonctionner. Ne pas
+       donner de permissions particulières à ce ps.
+
+       L'utilisation CPU est actuellement exprimée en pourcentage de temps passé à
+       fonctionner pendant le temps de vie complet d'un processus. Ce n'est ni idéal, ni
+       conforme aux normes par ailleurs respectées par ps. Il est peu probable que la
+       somme d'utilisations CPU soit exactement égale à 100 %.
+
+       Les champs SIZE et RSS ne comptent pas certaines parties d'un processus comme les
+       tables de pages, la pile du noyau, la structure thread_info, et la structure
+       task_struct. Cela représente au moins 20 Kio de mémoire toujours résidente. SIZE
+       est la taille virtuelle du processus (code + données + pile).
+
+       Les processus marqués <defunct> sont les processus tués (appelés « zombies ») qui
+       restent parce que leur parent ne les a pas détruits proprement. Ces processus
+       seront détruits par init(8) si le processus parent se termine.
+
+       If the length of the username is greater than the length of the display column,
+       the username will be truncated. See the -o and -O formatting options to customize
+       length.
+
+       Commands options such as ps -aux are not recommended as it is a confusion of two
+       different standards. According to the POSIX and UNIX standards, the above command
+       asks to display all processes with a TTY (generally the commands users are
+       running) plus all processes owned by a user named x. If that user doesn't exist,
+       then ps will assume you really meant ps aux.
+
+INDICATEURS DE PROCESSUS
+       La somme de ces valeurs est affichée dans la colonne « F », fournie par
+       l'indicateur de sortie flags :
+
+               1    engendré mais pas exécuté ;
+               4    a utilisé des privilèges de superutilisateur ;
+
+CODES D'ÉTAT DE PROCESSUS
+       Voici les différentes valeurs que les indicateurs de sortie s, stat et state
+       (en-tête « STAT » ou « S ») afficheront pour décrire l'état d'un processus :
+
+               D    en sommeil non interruptible (normalement entrées et sorties) ;
+               I    fil inactif du noyau ;
+               R    s'exécutant ou pouvant s'exécuter (dans la file d'exécution) ;
+               S    en sommeil interruptible (en attente d'un événement pour finir) ;
+               T    arrêté par le signal de contrôle de la tâche ;
+               t    arrêté par le débogueur lors du traçage ;
+               W    pagination (non valable depuis le noyau 2.6.xx) ;
+               X    tué (ne devrait jamais être vu) ;
+               Z    processus zombie (<defunct>), terminé mais pas détruit par son
+                    parent.
+
+       Pour les formats BSD et quand le mot-clé stat est utilisé, les caractères
+       supplémentaires suivants peuvent être affichés :
+
+               <    haute priorité (non poli pour les autres utilisateurs) ;
+               N    basse priorité (poli pour les autres utilisateurs) ;
+               L    avec ses pages verrouillées en mémoire (pour temps réel et entrées
+                    et sorties personnalisées) ;
+               s    meneur de session ;
+               l    possède plusieurs processus légers (« multi-thread », utilisant
+                    CLONE_THREAD comme NPTL pthreads le fait) ;
+               +    dans le groupe de processus au premier plan.
+
+CLÉS DE TRI OBSOLÈTES
+       Ces clés sont utilisées par l'option BSD O (quand elle est utilisée pour trier).
+       L'option GNU --sort n'utilise pas ces clés, mais celles décrites ci-dessous dans
+       la section INDICATEURS DE FORMAT STANDARDS. Remarquez que les valeurs utilisées
+       pour le tri sont les valeurs internes que ps utilise et non les valeurs
+       « trafiquées » utilisées dans certains champs de format de sortie (par exemple
+       trier sur tty ordonnera par numéro de périphérique, pas en fonction du nom de
+       terminal affiché). Envoyer la sortie de ps dans un tube (« pipe ») vers la
+       commande sort(1) permet d'obtenir un tri selon les valeurs trafiquées.
+
+       CLÉ   LONGUE       DESCRIPTION
+       c     cmd          juste le nom de l'exécutable
+       C     pcpu         utilisation du CPU
+
+       f     attributs    indicateurs comme le champ F du format long
+       g     pgrp         GID du processus
+       G     tpgid        GID du processus contrôlant le tty
+       j     cutime       temps utilisateur cumulé
+       J     cstime       temps système cumulé
+       k     utime        temps utilisateur
+       m     min_flt      nombre de défauts de page mineurs
+       M     maj_flt      nombre de défauts de page majeurs
+       n     cmin_flt     défauts de page mineurs cumulés
+       N     cmaj_flt     défauts de page majeurs cumulés
+       o     session      identifiant de session
+       p     pid          identifiant de processus (PID)
+       P     ppid         PID du processus parent
+       r     rss          taille de mémoire résidente
+       R     resident     pages résidentes
+       s     size         taille mémoire en kilooctets
+       S     share        nombre de pages partagées
+       t     tty          numéro de périphérique du tty contrôlant
+       T     start_time   heure de démarrage du processus
+       U     uid          identifiant utilisateur (UID)
+       u     user         nom d'utilisateur
+       v     vsize        taille totale de mémoire virtuelle en kibioctets
+       y     priority     priorité d'ordonnancement du noyau
+
+DESCRIPTEURS DE FORMAT AIX
+       Ce ps prend en charge les descripteurs de format AIX, qui fonctionnent un peu
+       comme les codes de formatage de printf(1) et printf(3). Par exemple, la sortie
+       normale par défaut peut être produite ainsi : ps -eo "%p %y %x %c". Les codes
+       STANDARD sont décrits dans la section suivante.
+
+       CODE   STANDARD   EN-TÊTE
+       %C     pcpu       %CPU
+       %G     group      GROUP
+       %P     ppid       PPID
+       %U     user       USER
+       %a     args       COMMAND
+       %c     comm       COMMAND
+       %g     rgroup     RGROUP
+       %n     nice       NI
+       %p     pid        PID
+       %r     pgid       PGID
+       %t     etime      ELAPSED
+       %u     ruser      RUSER
+       %x     time       TIME
+       %y     tty        TTY
+       %z     vsz        VSZ
+
+INDICATEURS DE FORMAT STANDARDS
+       Voici les différents mots-clés pouvant être utilisés pour contrôler le format de
+       sortie (par exemple avec l'option -o) ou pour trier les processus sélectionnés
+       avec l'option « à la GNU » --sort.
+
+       Par exemple : ps -eo pid,user,args --sort user
+
+       Cette version de ps essaye de reconnaître la plupart des mots-clés utilisés avec
+       les autres implémentations de ps.
+
+       Les indicateurs suivants de format définis par l'utilisateur peuvent contenir des
+       espaces : args, cmd, comm, command, fname, ucmd, ucomm, lstart, bsdstart, start.
+
+       Certains mots-clés peuvent être indisponibles pour le tri.
+
+       CODE        EN-TÊTE   DESCRIPTION
+
+       %cpu        %CPU      Utilisation CPU du processus exprimée avec un chiffre après
+                             la virgule. Actuellement, il s'agit du temps passé à
+                             fonctionner divisé par le temps de vie du processus
+                             (rapport cputime/realtime), exprimé en pourcentage. La
+                             somme ne dépassera pas 100 % sauf si vous êtes chanceux
+                             (alias pcpu).
+
+       %mem        %MEM      Rapport entre la taille de mémoire résidente (« resident
+                             set size » ou RSS) et la mémoire physique de la machine,
+                             exprimé en pourcentage (alias pmem).
+
+       ag_id       AGID      The autogroup identifier associated with a process which
+                             operates in conjunction with the CFS scheduler to improve
+                             interactive desktop performance.
+
+       ag_nice     AGNI      The autogroup nice value which affects scheduling of all
+                             processes in that group.
+
+       args        COMMAND   Commande avec tous ses arguments sous forme de chaîne. Les
+                             modifications aux arguments peuvent être montrées. Les
+                             éléments de cette colonne peuvent contenir des espaces. Un
+                             processus marqué <defunct> est partiellement tué. La valeur
+                             args est parfois indisponible pour le processus, dans ce
+                             cas, ps affichera à la place le nom de l'exécutable entre
+                             crochets (alias cmd, command). Consultez aussi le mot-clé
+                             de format comm et les options -f et c.
+                             Lorsque indiquée en dernier, cette colonne sera élargie
+                             jusqu'aux bords de l'affichage. Si ps ne peut pas
+                             déterminer la largeur de l'affichage, comme quand la sortie
+                             est renvoyée (dans un tube, « pipe ») vers un fichier ou
+                             une autre commande, la largeur de sortie n'est pas définie
+                             (elle peut être de 80 caractères, illimitée, déterminée par
+                             la variable TERM, etc.) La variable d'environnement COLUMNS
+                             ou l'option --cols permettent de déterminer avec exactitude
+                             la largeur dans ce cas. Les options w ou -w peuvent
+                             également être utilisées pour adapter la largeur.
+
+       blocked     BLOCKED   Masque des signaux bloqués, consultez signal(7). Suivant la
+                             largeur du champ, un masque de 32 ou 64 bits au format
+                             hexadécimal est affiché (alias sig_block, sigmask).
+
+       bsdstart    START     Heure de démarrage du processus. Si le processus a été
+                             démarré dans les dernières 24 heures, le format de sortie
+                             est «  HH:MM », sinon il est « Mmm JJ » (où « Mmm »
+                             représente les trois premières lettres du mois, en
+                             anglais). Consultez aussi lstart, start, start_time et
+                             stime.
+
+       bsdtime     TIME      Temps CPU cumulé, utilisateur plus système. Le format
+                             d'affichage est normalement « MMM:SS », mais peut être
+                             déplacé vers la droite si des processus ont cumulé plus de
+                             999 minutes de temps CPU.
+
+       c           C         Utilisation du processeur. C'est pour l'instant la partie
+                             entière du pourcentage d'utilisation par rapport au temps
+                             de vie du processus (consultez %cpu).
+
+       caught      CAUGHT    Masque des signaux bloqués, consultez signal(7). Suivant la
+                             largeur du champ, un masque de 32 ou 64 bits au format
+                             hexadécimal (alias sig_catch, sigcatch).
+
+       cgname      CGNAME    Afficher les groupes de contrôle auxquels appartient le
+                             processus.
+
+       cgroup      CGROUP    Afficher les groupes auxquels appartient le processus.
+
+       cgroupns    CGROUPNS  Unique inode number describing the namespace the process
+                             belongs to. See namespaces(7).
+
+       class       CLS       Ordonnancement de la classe du processus (alias
+                             policy, cls). Les valeurs possibles du champ sont :
+
+                                      -   non signalé
+                                      TS  SCHED_OTHER
+                                      FF  SCHED_FIFO
+                                      RR  SCHED_RR
+                                      B   SCHED_BATCH
+                                      ISO SCHED_ISO
+                                      IDL SCHED_IDLE
+                                      DLN SCHED_DEADLINE
+                                      ?   valeur inconnue
+
+       cls         CLS       Ordonnancement de la classe du processus (alias
+                             policy, cls). Les valeurs possibles du champ sont :
+
+                                      -   non signalé
+                                      TS  SCHED_OTHER
+                                      FF  SCHED_FIFO
+                                      RR  SCHED_RR
+                                      B   SCHED_BATCH
+                                      ISO SCHED_ISO
+                                      IDL SCHED_IDLE
+                                      DLN SCHED_DEADLINE
+                                      ?   valeur inconnue
+
+       cmd         CMD       Consultez args (alias args, command).
+
+       comm        COMMAND   command name (only the executable name). Modifications to
+                             the command name will not be shown. A process marked
+                             <defunct> is partly dead, waiting to be fully destroyed by
+                             its parent. The output in this column may contain spaces.
+                             (alias ucmd, ucomm). See also the args format keyword, the
+                             -f option, and the c option.
+                             Lorsque indiquée en dernier, cette colonne sera élargie
+                             jusqu'aux bords de l'affichage. Si ps ne peut pas
+                             déterminer la largeur de l'affichage, comme quand la sortie
+                             est renvoyée (dans un tube, « pipe ») vers un fichier ou
+                             une autre commande, la largeur de sortie n'est pas définie
+                             (elle peut être de 80 caractères, illimitée, déterminée par
+                             la variable TERM, etc.) La variable d'environnement COLUMNS
+                             ou l'option --cols permettent de déterminer avec exactitude
+                             la largeur dans ce cas. Les options w ou -w peuvent
+                             également être utilisées pour adapter la largeur.
+
+       command     COMMAND   Consultez args (alias args, command).
+
+       cp          CP        Utilisation CPU en pour mille (dixième de pour cent)
+                             (consultez %cpu).
+
+       cputime     TIME      Temps CPU cumulé, au format « [JJ-]HH:MM:SS » (alias time).
+
+       cputimes    TIME      Temps CPU cumulé en secondes (alias times).
+
+       cuc         %CUC      The CPU utilization of a process, including dead children,
+                             in an extended "##.###" format. (see also %cpu, c, cp, cuu,
+                             pcpu).
+
+       cuu         %CUU      The CPU utilization of a process in an extended "##.###"
+                             format. (see also %cpu, c, cp, cuc, pcpu).
+
+       drs         DRS       Taille des données en mémoire résidente, la quantité de
+                             mémoire physique consacrée à autre chose que le code
+                             exécutable.
+
+       egid        EGID      Identifiant de groupe effectif (EGID) du processus sous
+                             forme d'entier décimal (alias gid).
+
+       egroup      EGROUP    Identifiant de groupe effectif (EGID) du processus, au
+                             format texte s'il peut être obtenu et que la largeur du
+                             champ le permet, sous forme d'entier décimal sinon (alias
+                             group).
+
+       eip         EIP       instruction pointer. As of kernel 4.9.xx will be zeroed out
+                             unless task is exiting or being core dumped.
+
+       esp         ESP       stack pointer. As of kernel 4.9.xx will be zeroed out
+                             unless task is exiting or being core dumped.
+
+       etime       ELAPSED   Temps écoulé depuis que le processus a été démarré, au
+                             format « [[JJ-]HH:]MM:SS ».
+
+       etimes      ELAPSED   Temps écoulé depuis que le processus a été démarré, en
+                             seconde.
+
+       euid        EUID      Identifiant utilisateur effectif (EUID) (alias uid).
+
+       euser       EUSER     Nom d'utilisateur effectif, au format texte s'il peut être
+                             obtenu et que la largeur du champ le permet, sous forme
+                             d'entier décimal sinon. L'option n peut être utilisée pour
+                             forcer la représentation décimale (alias uname, user).
+
+       exe         EXE       path to the executable. Useful if path cannot be printed
+                             via cmd, comm or args format options.
+
+       f           F         Indicateur associé au processus, consultez la section
+                             INDICATEURS DE PROCESSUS (alias flag, flags).
+
+       fgid        FGID      GID d'accès au système de fichiers (alias fsgid).
+
+       fgroup      FGROUP    GID d'accès au système de fichier, au format texte s'il
+                             peut être obtenu et que la largeur du champ le permet, ou
+                             sous forme d'entier décimal sinon (alias fsgroup).
+
+       flag        F         Consultez f (alias f, flags).
+
+       attributs   F         Consultez f (alias f, flag).
+
+       fname       COMMAND   Huit premiers octets du nom de base du fichier exécutable
+                             du processus. Les éléments de cette colonne peuvent
+                             contenir des espaces.
+
+       fuid        FUID      UID d'accès au système de fichier (alias fsuid).
+
+       fuser       FUSER     UID d'accès au système de fichier, au format texte s'il
+                             peut être obtenu et que la largeur du champ le permet, sous
+                             forme d'entier décimal sinon.
+
+       gid         GID       Consultez egid (alias egid).
+
+       group       GROUP     Consultez egroup (alias egroup).
+
+       ignored     IGNORED   Masque des signaux ignorés, consultez signal(7). Suivant la
+                             largeur du champ, un masque de 32 ou 64 bits au format
+                             hexadécimal (alias sig_ignore, sigignore).
+
+       ipcns       IPCNS     Unique inode number describing the namespace the process
+                             belongs to. See namespaces(7).
+
+       label       LABEL     Étiquette de sécurité, surtout utilisée en contexte de
+                             données SELinux. À destination du contrôle d'accès
+                             obligatoire (« Mandatory Access Control » ou « MAC »)
+                             trouvé sur les systèmes de haute sécurité.
+
+       lstart      STARTED   Heure de démarrage du processus. Consultez aussi
+                             bsdstart, start, start_time et stime.
+
+       lsession    SESSION   Afficher l'identifiant de session d'un processus, si la
+                             prise en charge de systemd a été incluse.
+
+       luid        LUID      Afficher l’identifiant de session d'un processus.
+
+       lwp         LWP       Identifiant de processus léger (« light weight process » ou
+                             « thread » ) de l'entité distribuable (alias spid, tid).
+                             Consultez tid pour plus de renseignements.
+
+       lxc         LXC       Le nom du conteneur lxc dans lequel une tâche est en cours.
+                             Si un processus n'est pas en cours dans un conteneur, un
+                             tiret (« - ») sera affiché.
+
+       machine     MACHINE   Afficher le nom de machine pour les processus assignés à
+                             une machine virtuelle ou un conteneur si la prise en charge
+                             de systemd a été incluse.
+
+       maj_flt     MAJFLT    Nombre de défauts de page majeurs survenus avec ce
+                             processus.
+
+       min_flt     MINFLT    Nombre de défauts de page mineurs survenus avec ce
+                             processus.
+
+       mntns       MNTNS     Unique inode number describing the namespace the process
+                             belongs to. See namespaces(7).
+
+       netns       NETNS     Unique inode number describing the namespace the process
+                             belongs to. See namespaces(7).
+
+       ni          NI        Valeur de politesse, comprise entre 19 (la plus polie) à
+                             -20 (la moins polie pour les autres), Consultez nice(1)
+                             (alias nice).
+
+       nice        NI        Consultez ni (alias ni).
+
+       nlwp        NLWP      Nombre de processus légers (threads) dans le processus
+                             (alias thcount).
+
+       numa        NUMA      The node associated with the most recently used processor.
+                             A -1 means that NUMA information is unavailable.
+
+       nwchan      WCHAN     address of the kernel function where the process is
+                             sleeping (use wchan if you want the kernel function name).
+
+       oom         OOM       Out of Memory Score. The value, ranging from 0 to +1000,
+                             used to select task(s) to kill when memory is exhausted.
+
+       oomadj      OOMADJ    Out of Memory Adjustment Factor. The value is added to the
+                             current out of memory score which is then used to determine
+                             which task to kill when memory is exhausted.
+
+       ouid        OWNER     Identifiant utilisateur UNIX du propriétaire de la session
+                             d'un processus si la prise en charge de systemd a été
+                             incluse.
+
+       pcpu        %CPU      Consultez %cpu (alias %cpu).
+
+       pending     PENDING   Masque des signaux en attente, consultez signal(7). Les
+                             signaux en attente du processus sont différents des signaux
+                             en attente de processus légers individuels. Utilisez
+                             l'option m ou l'option -m pour voir les deux. Suivant la
+                             largeur du champ, un masque de 32 ou 64 bits au format
+                             hexadécimal est affiché (alias sig).
+
+       pgid        PGID      Identifiant du processus (PID) ou, de manière équivalente,
+                             le PID du meneur du groupe (alias pgrp).
+
+       pgrp        PGRP      Consultez pgid (alias pgid).
+
+       pid         PID       Un nombre représentant l'identifiant de processus (alias
+                             tgid).
+
+       pidns       PIDNS     Unique inode number describing the namespace the process
+                             belongs to. See namespaces(7).
+
+       pmem        %MEM      Consultez %mem (alias %mem).
+
+       policy      POL       Ordonnancement de la classe du processus (alias
+                             class, cls). Les valeurs possibles sont :
+
+                                      -   non signalé
+                                      TS  SCHED_OTHER
+                                      FF  SCHED_FIFO
+                                      RR  SCHED_RR
+                                      B   SCHED_BATCH
+                                      ISO SCHED_ISO
+                                      IDL SCHED_IDLE
+                                      DLN SCHED_DEADLINE
+                                      ?   valeur inconnue
+
+       ppid        PPID      PID du processus parent.
+
+       pri         PRI       priority of the process. Higher number means higher
+                             priority.
+
+       psr         PSR       processor that process last executed on.
+
+       pss         PSS       Proportional share size, the non-swapped physical memory,
+                             with shared memory proportionally accounted to all tasks
+                             mapping it.
+
+       rbytes      RBYTES    Number of bytes which this process really did cause to be
+                             fetched from the storage layer.
+
+       rchars      RCHARS    Number of bytes which this task has caused to be read from
+                             storage.
+
+       rgid        RGID      Identifiant de groupe réel (RGID).
+
+       rgroup      RGROUP    Identifiant de groupe réel, au format texte s'il peut être
+                             obtenu et que la largeur du champ le permet, sous forme
+                             d'entier décimal sinon.
+
+       rops        ROPS      Number of read I/O operationsâthat is, system calls such
+                             as read(2) and pread(2).
+
+       rss         RSS       Taille de mémoire résidente (« resident set size » ou RSS),
+                             la mémoire physique non transférée vers l'espace d'échange
+                             (swap) qu'une tâche a utilisée (en kilooctets) (alias
+                             rssize, rsz).
+
+       rssize      RSS       Consultez rss (alias rss, rsz).
+
+       rsz         RSZ       Consultez rss (alias rss, rssize).
+
+       rtprio      RTPRIO    Priorité temps réel (« realtime »).
+
+       ruid        RUID      Identifiant d'utilisateur réel (RUID).
+
+       ruser       RUSER     Identifiant d'utilisateur réel (RUID),au format texte s'il
+                             peut être obtenu et que la largeur du champ le permet, sous
+                             forme d'entier décimal sinon.
+
+       s           S         Affichage d'état minimal (un caractère). Consultez la
+                             section CODES D'ÉTAT DE PROCESSUS pour la signification des
+                             différentes valeurs. Consultez aussi stat pour l'affichage
+                             de renseignements supplémentaires (alias state).
+
+       sched       SCH       Ordonnancement de la politique du processus. Les politiques
+                             SCHED_OTHER (SCHED_NORMAL), SCHED_FIFO, SCHED_RR,
+                             SCHED_BATCH, SCHED_ISO et SCHED_IDLE sont respectivement
+                             affichées comme 0, 1, 2, 3, 4 et 5.
+
+       seat        SEAT      Afficher l'identifiant associé à tous les périphériques
+                             ayant un emplacement de travail précis, si la prise en
+                             charge de systemd a été incluse.
+
+       sess        SESS      Identifiant de session ou, de manière équivalente, le PID
+                             du meneur de session (alias session, sid).
+
+       sgi_p       P         Processeur sur lequel le processus est actuellement
+                             exécuté. Afficher « * » si le processus ne s'exécute pas ou
+                             ne peut pas s'exécuter.
+
+       sgid        SGID      Identifiant de groupe (GID) sauvegardé (alias svgid).
+
+       sgroup      SGROUP    Nom de groupe sauvegardé, au format texte s'il peut être
+                             obtenu et que la largeur du champ le permet, sous forme
+                             d'entier décimal sinon.
+
+       sid         SID       Consultez sess (alias sess, session).
+
+       sig         PENDING   Consultez pending (alias pending, sig_pend).
+
+       sigcatch    CAUGHT    Consultez caught (alias caught, sig_catch).
+
+       sigignore   IGNORED   Consultez ignored (alias ignored, sig_ignore).
+
+       sigmask     BLOCKED   Consultez blocked (alias blocked, sig_block).
+
+       size        SIZE      Montant approximatif d'espace d'échange qui serait
+                             nécessaire si le processus s'apprêtait à modifier
+                             (« dirty ») toutes les pages accessibles en écriture puis
+                             se transférait sur l'espace d'échange (« swap »). Ce nombre
+                             est très approximatif !
+
+       slice       SLICE     Unité « slice » à laquelle appartient le processus si la
+                             prise en charge de systemd a été incluse.
+
+       spid        SPID      Consultez lwp (alias lwp, tid).
+
+       stackp      STACKP    Adresse du bas (début) de la pile pour le processus.
+
+       start       STARTED   Heure de démarrage du processus. Si le processus a été
+                             démarré dans les dernières 24 heures, le format de sortie
+                             est « HH:MM:SS », sinon il est «   Mmm JJ » (où « Mmm »
+                             sont les trois premières lettres du mois, en anglais).
+                             Consultez aussi lstart, bsdstart, start_time et stime.
+
+       start_time  START     Heure ou date de démarrage du processus. Seule l'année est
+                             affichée si le processus n'a pas été démarré la même année
+                             que ps a été appelé, « MmmDD » s'il n'a pas été démarré le
+                             même jour ou « HH:MM » sinon. Consultez aussi
+                             bsdstart, start, lstart et stime.
+
+       stat        STAT      État multicaractère du processus. Consultez la section
+                             CODES D'ÉTAT DE PROCESSUS pour la signification des
+                             différentes valeurs. Consultez aussi s et state pour
+                             l'affichage du premier caractère seulement.
+
+       state       S         Consultez s (alias s).
+
+       stime       STIME     see start_time. (alias start_time).
+
+       suid        SUID      Identifiant utilisateur (UID) sauvegardé (alias svuid).
+
+       supgid      SUPGID    GID des groupes additionnels, s'il y en a. Consultez
+                             getgroups(2).
+
+       supgrp      SUPGRP    Noms des groupes additionnels, s'il y en a. Consultez
+                             getgroups(2).
+
+       suser       SUSER     Nom d'utilisateur sauvegardé, au format texte s'il peut
+                             être obtenu et que la largeur du champ le permet, sous
+                             forme d'entier décimal sinon. (alias svuser).
+
+       svgid       SVGID     Consultez sgid (alias sgid).
+
+       svuid       SVUID     Consultez suid (alias suid).
+
+       sz          SZ        Taille en pages physiques de l'image du noyau du processus,
+                             incluant le texte, les données et l'espace de la pile. Les
+                             correspondances (« mappings ») de périphériques sont
+                             actuellement ignorées, mais cela pourrait changer.
+                             Consultez vsz et rss.
+
+       tgid        TGID      Un nombre représentant le groupe de processus légers auquel
+                             une tâche appartient, (alias pid). C'est l'identifiant de
+                             processus du meneur de groupe de processus légers.
+
+       thcount     THCNT     Consultez nlwp (alias nlwp). Nombre de processus légers du
+                             noyau (thread) appartenant au processus.
+
+       tid         TID       L'unique nombre représentant l'identifiant d'une entité
+                             distribuable (alias lwp, spid). Cette valeur peut aussi
+                             apparaître en tant qu'identifiant de processus (pid),
+                             identifiant de groupe de processus (pgrp), identifiant de
+                             session du meneur de session (sid), identifiant de groupe
+                             de processus léger du meneur de processus léger (tgid) et
+                             identifiant du groupe de processus du meneur de groupe de
+                             processus (tpgid).
+
+       time        TIME      Temps CPU cumulé, au format « [JJ-]HH:MM:SS » (alias
+                             cputime).
+
+       timens      TIMENS    Unique inode number describing the namespace the process
+                             belongs to. See namespaces(7).
+
+       times       TIME      Temps CPU cumulé, en seconde (alias cputime).
+
+       tname       TTY       tty (terminal) de contrôle (alias tt, tty).
+
+       tpgid       TPGID     Identifiant du groupe de processus au premier plan sur le
+                             terminal (tty) auquel le processus est connecté, ou -1 si
+                             le processus n'est pas connecté à un tty.
+
+       trs         TRS       Taille du texte en mémoire résidente, la quantité de
+                             mémoire physique consacrée au code exécutable.
+
+       tt          TT        tty (terminal) de contrôle (alias tname, tty).
+
+       tty         TT        tty (terminal) de contrôle (alias tname, tt).
+
+       ucmd        CMD       Consultez comm (alias comm, ucomm).
+
+       ucomm       COMMAND   Consultez comm (alias comm, ucmd).
+
+       uid         UID       Consultez euid (alias euid).
+
+       uname       USER      Consultez euser (alias euser, user).
+
+       unit        UNIT      Afficher l'unité « slice » à laquelle appartient le
+                             processus, si la prise en charge de systemd est incluse.
+
+       user        USER      Consultez euser (alias euser, uname).
+
+       userns      USERNS    Unique inode number describing the namespace the process
+                             belongs to. See namespaces(7).
+
+       uss         USS       Unique set size, the non-swapped physical memory, which is
+                             not shared with an another task.
+
+       utsns       UTSNS     Unique inode number describing the namespace the process
+                             belongs to. See namespaces(7).
+
+       uunit       UUNIT     Afficher l'unité « slice » à laquelle appartient le
+                             processus, si la prise en charge de systemd est incluse.
+
+       vsize       VSZ       Consultez vsz (alias vsz).
+
+       vsz         VSZ       Taille de la mémoire virtuelle du processus en Kio (unités
+                             de 1024 octets). Les correspondances (« mappings ») de
+                             périphériques sont actuellement ignorées, mais cela
+                             pourrait changer (alias vsize).
+
+       wbytes      WBYTES    Number of bytes which this process caused to be sent to the
+                             storage layer.
+
+       wcbytes     WCBYTES   Number of cancelled write bytes.
+
+       wchan       WCHAN     name of the kernel function in which the process is
+                             sleeping.
+
+       wchars      WCHARS    Number of bytes which this task has caused, or shall cause
+                             to be written to disk.
+
+       wops        WOPS      Number of write I/O operationsâthat is, system calls such
+                             as write(2) and pwrite(2).
+
+VARIABLES D'ENVIRONNEMENT
+       Les variables d'environnement suivantes peuvent affecter ps :
+
+       COLUMNS
+          Remplacer la largeur par défaut de l'affichage.
+
+       LINES
+          Remplacer la hauteur par défaut de l'affichage.
+
+       PS_PERSONALITY
+          Configurer parmi posix, old, linux, bsd, sun, digital, etc. (consultez
+          ci-dessous la section PERSONNALITÉ).
+
+       CMD_ENV
+          Configurer parmi posix, old, linux, bsd, sun, digital, etc. (consultez
+          ci-dessous la section PERSONNALITÉ).
+
+       I_WANT_A_BROKEN_PS
+          Forcer l'interprétation obsolète de la ligne de commande.
+
+       LC_TIME
+          Format de date.
+
+       LIBPROC_HIDE_KERNEL
+          Set this to any value to hide kernel threads normally displayed with the -e
+          option. This is equivalent to selecting --ppid 2 -p 2 --deselect instead. Also
+          works in BSD mode.
+
+       PS_COLORS
+          Non pris en charge pour le moment.
+
+       PS_FORMAT
+          Redéfinir le format de sortie par défaut, à configurer avec une chaîne de
+          format du même type que celle utilisée pour l'option -o. Les valeurs DefSysV
+          et DefBSD sont particulièrement utiles.
+
+       POSIXLY_CORRECT
+          Ne pas chercher d'excuse pour ignorer les mauvaises « fonctionnalités ».
+
+       POSIX2
+          Agir comme POSIXLY_CORRECT une fois configuré à « on ».
+
+       UNIX95
+          Ne pas chercher d'excuse pour ignorer les mauvaises « fonctionnalités ».
+
+       _XPG
+          Annuler le comportement non standard CMD_ENV=irix.
+
+       Il est généralement déconseillé de configurer ces variables, à l'exception de
+       CMD_ENV ou PS_PERSONALITY. Ces dernières peuvent être configurées à linux pour
+       les systèmes normaux. Sans cette configuration, ps suit les aspects inutiles et
+       mauvais de la norme Unix98.
+
+PERSONNALITÉ
+       390        comme le ps d'0S/390 Open Edition
+       aix        comme le ps d'AIX
+       bsd        comme le ps de FreeBSD (complètement non standard)
+       compaq     comme le ps de Digital Unix B
+       debian     comme l'ancien ps de Debian
+       digital    comme le ps de Tru64 (ex. Digital Unix, ex. OSF/1)
+       gnu        comme l'ancien ps de Debian
+       hp         comme le ps de HP-UX
+       hpux       comme le ps de HP-UX
+       irix       comme le ps d'Irix
+       linux      ***** recommandé *****
+       old        comme le ps d'origine de Linux (entièrement non standard)
+       os390      comme le ps d'OS/390 Open Edition
+       posix      standard
+       s390       comme le ps d'OS/390 Open Edition
+       sco        comme le ps de SCO
+       sgi        comme le ps d'Irix
+       solaris2   comme le ps de Solaris 2+ (SunOS 5)
+       sunos4     comme le ps de SunOS 4 (Solaris 1) (non standard)
+       svr4       standard
+       sysv       standard
+       tru64      comme le ps de Tru64 (ex. Digital Unix, ex. OSF/1)
+       unix       standard
+       unix95     standard
+       unix98     standard
+
+VOIR AUSSI
+       pgrep(1), pstree(1), top(1), proc(5)
+
+STANDARDS
+       Ce ps est conforme à :
+
+       1   la Single UNIX Specification version 2 ;
+       2   les Open Group Technical Standard Base Specifications, version 6 ;
+       3   l'IEEE Std 1003.1, édition 2004 ;
+       4   la X/Open System Interfaces Extension [UP XSI] ;
+       5   l'ISO/IEC 9945:2003.
+
+AUTEUR
+       ps a été initialement écrit par Branko Lankester <lankeste@fwi.uva.nl>. Michael
+       K. Johnson <johnsonm@redhat.com> l'a réécrit en profondeur pour utiliser le
+       système de fichiers proc, modifiant quelques détails au passage. Michael Shields
+       <mjshield@nyx.cs.du.edu> a ajouté la fonctionnalité de liste de PID. Charles
+       Blake <cblake@bbn.com> a ajouté le tri multiniveau, la bibliothèque « à la
+       dirent », la base de données de correspondance entre numéro de périphérique et
+       nom, la recherche approximative binaire directement dans System.map, et beaucoup
+       de nettoyage de code et de documentation. David Mossberger-Tang a écrit la prise
+       en charge BFD pour psupdate. Albert Cahalan <albert@users.sf.net> a réécrit ps
+       pour prendre en charge complètement Unix98 et BSD, ainsi que certains
+       bidouillages pour les syntaxes obsolètes et externes.
+
+       Signalez les bogues à <procps@freelists.org>. L'inscription n'est ni nécessaire,
+       ni suggérée.
+
+procps-ng                              2022-05-11                                  PS(1)
